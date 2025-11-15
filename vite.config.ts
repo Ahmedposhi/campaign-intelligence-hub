@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  base: "/campaign-intelligence-hub/",
   plugins: [react()],
   resolve: {
     alias: {
@@ -10,8 +11,3 @@ export default defineConfig({
     },
   },
 });
-export default defineConfig({
-  base: '/campaign-intelligence-hub/',
-  plugins: [react()],
-});
-
