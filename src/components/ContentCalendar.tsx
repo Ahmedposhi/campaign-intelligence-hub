@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Campaign, ContentItem } from '@/types'
-import { Calendar, FileText, Video, Mail, Layout, Plus, Trash2 } from 'lucide-react'
+import type { Campaign, ContentItem } from '@/types'
+
 import { toast } from 'sonner'
 
 interface ContentCalendarProps {
@@ -143,12 +141,10 @@ const ContentCalendar = ({ campaign, onUpdateCampaign }: ContentCalendarProps) =
               <CardDescription>Plan and schedule your marketing content for {campaign.name}</CardDescription>
             </div>
             <Dialog open={isAddingContent} onOpenChange={setIsAddingContent}>
-              <DialogTrigger asChild>
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Content
                 </Button>
-              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add New Content</DialogTitle>

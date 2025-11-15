@@ -5,9 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Campaign } from '@/types'
+import type { Campaign } from '@/types'
 import { ChevronRight, ChevronLeft, Sparkles, Target, Users, DollarSign, Calendar as CalendarIcon } from 'lucide-react'
 
 interface CampaignWizardProps {
@@ -92,9 +91,7 @@ const CampaignWizard = ({ onCampaignCreate }: CampaignWizardProps) => {
             <CardTitle className="text-2xl">Create New Campaign</CardTitle>
             <CardDescription>Step {step} of {totalSteps}</CardDescription>
           </div>
-          <Badge variant="outline" className="px-3 py-1">
             {Math.round(progress)}% Complete
-          </Badge>
         </div>
         <Progress value={progress} className="mt-4" />
       </CardHeader>
@@ -272,7 +269,6 @@ const CampaignWizard = ({ onCampaignCreate }: CampaignWizardProps) => {
                 <p className="text-sm text-slate-600 mb-2">Channels</p>
                 <div className="flex flex-wrap gap-2">
                   {formData.channels.map(channel => (
-                    <Badge key={channel} variant="secondary">{channel}</Badge>
                   ))}
                 </div>
               </div>

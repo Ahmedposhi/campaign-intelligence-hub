@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Campaign } from '@/types'
+import type { Campaign } from '@/types'
 import { Edit, Trash2, Play, Pause, CheckCircle, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -92,7 +90,6 @@ const CampaignSelector = ({
               <CardTitle>Your Campaigns</CardTitle>
               <CardDescription>Select and manage your marketing campaigns</CardDescription>
             </div>
-            <Badge variant="outline">{campaigns.length} Total</Badge>
           </div>
         </CardHeader>
         <CardContent>
@@ -111,10 +108,8 @@ const CampaignSelector = ({
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-lg">{campaign.name}</h3>
-                        <Badge className={`${getStatusColor(campaign.status)} capitalize`}>
                           {getStatusIcon(campaign.status)}
                           <span className="ml-1">{campaign.status}</span>
-                        </Badge>
                       </div>
                       <p className="text-sm text-slate-600 capitalize mb-3">
                         {campaign.objective.replace('-', ' ')}

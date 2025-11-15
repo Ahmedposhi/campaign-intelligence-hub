@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import CampaignWizard from '@/components/CampaignWizard'
@@ -11,7 +9,7 @@ import CampaignDashboard from '@/components/CampaignDashboard'
 import CampaignSelector from '@/components/CampaignSelector'
 import ContentCalendar from '@/components/ContentCalendar'
 import ROICalculator from '@/components/ROICalculator'
-import { Campaign } from '@/types'
+import type { Campaign } from '@/types'
 import { storage } from '@/utils/storage'
 import { Sparkles, LayoutDashboard, Calendar, Calculator, Download, Upload, Save, Trash2, FolderOpen } from 'lucide-react'
 
@@ -143,9 +141,7 @@ function App() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="px-4 py-2">
                 {campaigns.length} Campaign{campaigns.length !== 1 ? 's' : ''}
-              </Badge>
               <div className="flex gap-2">
                 <Button
                   variant="outline"

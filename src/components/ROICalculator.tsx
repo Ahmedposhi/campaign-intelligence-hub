@@ -3,10 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Campaign } from '@/types'
-import { DollarSign, TrendingUp, Users, Target, RefreshCw } from 'lucide-react'
+import type { Campaign } from '@/types'
 
 interface ROICalculatorProps {
   campaign: Campaign | null
@@ -59,7 +57,6 @@ const ROICalculator = ({ campaign }: ROICalculatorProps) => {
     {
       label: 'ROI',
       value: `${roi.toFixed(1)}%`,
-      icon: TrendingUp,
       color: roi > 0 ? 'text-green-600' : 'text-red-600',
       bgColor: roi > 0 ? 'bg-green-50' : 'bg-red-50',
     },
@@ -111,7 +108,6 @@ const ROICalculator = ({ campaign }: ROICalculatorProps) => {
         <Card className="border-2 border-dashed border-blue-200 bg-blue-50">
           <CardContent className="pt-6">
             <div className="flex items-start gap-3">
-              <TrendingUp className="w-5 h-5 text-blue-600 mt-0.5" />
               <div>
                 <h4 className="font-medium text-sm mb-1 text-blue-900">No Campaign Selected</h4>
                 <p className="text-sm text-blue-700">
@@ -190,9 +186,7 @@ const ROICalculator = ({ campaign }: ROICalculatorProps) => {
             <div className="pt-4 border-t">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm text-slate-600">Expected Conversions</span>
-                <Badge variant="secondary" className="text-base px-3 py-1">
                   {conversions}
-                </Badge>
               </div>
             </div>
           </CardContent>
@@ -261,7 +255,6 @@ const ROICalculator = ({ campaign }: ROICalculatorProps) => {
 
             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-blue-600" />
                 ROI Analysis
               </h4>
               <p className="text-sm text-slate-700">

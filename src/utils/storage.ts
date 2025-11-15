@@ -1,11 +1,11 @@
-import { Campaign } from '@/types'
+import type { Campaign } from '@/types'
 
 const STORAGE_KEY = 'campaign-intelligence-hub-data'
 
 export const storage = {
   saveCampaigns: (campaigns: Campaign[]) => {
     try {
-      const serialized = JSON.stringify(campaigns, (key, value) => {
+      const serialized = JSON.stringify(campaigns, (_, value) => {
         // Convert Date objects to ISO strings
         if (value instanceof Date) {
           return value.toISOString()
@@ -25,7 +25,7 @@ export const storage = {
       const serialized = localStorage.getItem(STORAGE_KEY)
       if (!serialized) return []
       
-      const campaigns = JSON.parse(serialized, (key, value) => {
+      const campaigns = JSON.parse(serialized, (_, value) => {
         // Convert ISO strings back to Date objects
         if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
           return new Date(value)
@@ -46,7 +46,7 @@ export const storage = {
 
   importCampaigns: (jsonString: string): Campaign[] | null => {
     try {
-      const campaigns = JSON.parse(jsonString, (key, value) => {
+      const campaigns = JSON.parse(jsonString, (_, value) => {
         // Convert ISO strings back to Date objects
         if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
           return new Date(value)

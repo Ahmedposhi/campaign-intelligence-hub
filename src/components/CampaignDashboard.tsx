@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Campaign, KPI } from '@/types'
-import { TrendingUp, Users, DollarSign, Target, Calendar, Edit, Plus, Trash2, Settings } from 'lucide-react'
+import type { Campaign, KPI } from '@/types'
 import { toast } from 'sonner'
 
 interface CampaignDashboardProps {
@@ -102,11 +99,7 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
   const leadProgress = targetLeads > 0 ? (currentLeads / targetLeads) * 100 : 0
 
   const conversionKPI = campaign.kpis.find(kpi => kpi.name.toLowerCase().includes('conversion'))
-  const currentConversion = conversionKPI?.current || 0
-
   const engagementKPI = campaign.kpis.find(kpi => kpi.name.toLowerCase().includes('engagement'))
-  const currentEngagement = engagementKPI?.current || 0
-
   const metrics = [
     {
       title: 'Total Budget',
@@ -149,12 +142,10 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
                 {campaign.objective.replace('-', ' ')}
               </CardDescription>
             </div>
-            <Badge
               variant={campaign.status === 'active' ? 'default' : 'secondary'}
               className="px-3 py-1 capitalize"
             >
               {campaign.status}
-            </Badge>
           </div>
         </CardHeader>
       </Card>
@@ -188,12 +179,10 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
                 <CardDescription>Track progress toward your goals</CardDescription>
               </div>
               <Dialog open={isAddingKPI} onOpenChange={setIsAddingKPI}>
-                <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-1" />
                     Add KPI
                   </Button>
-                </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Add New KPI</DialogTitle>
@@ -256,7 +245,6 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
                           {kpi.current} / {kpi.target} {kpi.unit}
                         </span>
                         <Dialog open={editingKPI === kpi.name} onOpenChange={(open) => !open && setEditingKPI(null)}>
-                          <DialogTrigger asChild>
                             <Button 
                               variant="ghost" 
                               size="sm" 
@@ -269,7 +257,6 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
                             >
                               <Edit className="h-3 w-3" />
                             </Button>
-                          </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
                               <DialogTitle>Update {kpi.name}</DialogTitle>
@@ -297,7 +284,6 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
                           </DialogContent>
                         </Dialog>
                         <Dialog open={isEditingKPIDetails?.name === kpi.name} onOpenChange={(open) => !open && setIsEditingKPIDetails(null)}>
-                          <DialogTrigger asChild>
                             <Button 
                               variant="ghost" 
                               size="sm" 
@@ -307,7 +293,6 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
                             >
                               <Settings className="h-3 w-3" />
                             </Button>
-                          </DialogTrigger>
                           <DialogContent>
                             <DialogHeader>
                               <DialogTitle>Edit KPI Details</DialogTitle>
@@ -394,7 +379,6 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
               <h4 className="font-medium text-sm">Selected Channels</h4>
               <div className="flex flex-wrap gap-2">
                 {campaign.channels.map(channel => (
-                  <Badge key={channel} variant="secondary">{channel}</Badge>
                 ))}
               </div>
             </div>
