@@ -6,6 +6,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { Campaign, ContentItem } from '@/types'
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { FileText, Mail, Video, Layout, Plus, Trash2 } from 'lucide-react'
+
 import { toast } from 'sonner'
 
 interface ContentCalendarProps {

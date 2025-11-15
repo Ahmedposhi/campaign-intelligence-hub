@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { Button } from '@/components/ui/button'
 import type { Campaign } from '@/types'
+import { DollarSign, Users, Target, RefreshCw, TrendingUp } from 'lucide-react'
 
 interface ROICalculatorProps {
   campaign: Campaign | null
@@ -42,9 +43,11 @@ const ROICalculator = ({ campaign }: ROICalculatorProps) => {
 
   const conversions = Math.round(leads * (conversionRate / 100))
   const revenue = conversions * avgDealValue
-  const roi = ((revenue - investment) / investment) * 100
-  const cpl = investment / leads
-  const cac = investment / conversions
+  const roi = investment > 0 ? ((revenue - investment) / investment) * 100 : 0
+  const cpl = leads > 0 ? investment / leads : 0
+  const cac = conversions > 0 ? investment / conversions : 0
+  const profitMargin = revenue > 0 ? ((revenue - investment) / revenue * 100) : 0
+  const revenueMultiple = investment > 0 ? (revenue / investment) : 0
 
   const metrics = [
     {
@@ -57,6 +60,7 @@ const ROICalculator = ({ campaign }: ROICalculatorProps) => {
     {
       label: 'ROI',
       value: `${roi.toFixed(1)}%`,
+      icon: TrendingUp,
       color: roi > 0 ? 'text-green-600' : 'text-red-600',
       bgColor: roi > 0 ? 'bg-green-50' : 'bg-red-50',
     },
@@ -241,15 +245,11 @@ const ROICalculator = ({ campaign }: ROICalculatorProps) => {
               </div>
               <div className="p-4 border rounded-lg">
                 <p className="text-sm text-slate-600 mb-1">Profit Margin</p>
-                <p className="text-2xl font-bold">
-                  {((revenue - investment) / revenue * 100).toFixed(1)}%
-                </p>
+                <p className="text-2xl font-bold">{profitMargin.toFixed(1)}%</p>
               </div>
               <div className="p-4 border rounded-lg">
                 <p className="text-sm text-slate-600 mb-1">Revenue Multiple</p>
-                <p className="text-2xl font-bold">
-                  {(revenue / investment).toFixed(2)}x
-                </p>
+                <p className="text-2xl font-bold">{revenueMultiple.toFixed(2)}x</p>
               </div>
             </div>
 

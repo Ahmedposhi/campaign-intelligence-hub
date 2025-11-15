@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Campaign } from '@/types'
 import { Edit, Trash2, Play, Pause, CheckCircle, Clock } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 
 interface CampaignSelectorProps {
@@ -109,7 +110,7 @@ const CampaignSelector = ({
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-lg">{campaign.name}</h3>
                           {getStatusIcon(campaign.status)}
-                          <span className="ml-1">{campaign.status}</span>
+                          <span className={`ml-2 ${getStatusColor(campaign.status)} px-2 py-0.5 rounded text-xs`}>{campaign.status}</span>
                       </div>
                       <p className="text-sm text-slate-600 capitalize mb-3">
                         {campaign.objective.replace('-', ' ')}

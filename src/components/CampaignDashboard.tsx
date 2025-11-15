@@ -4,6 +4,8 @@ import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { DollarSign, Target, Calendar, Users, Plus, Edit, Settings, Trash2 } from 'lucide-react'
 import type { Campaign, KPI } from '@/types'
 import { toast } from 'sonner'
 
@@ -98,8 +100,7 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
   const targetLeads = leadsKPI?.target || 0
   const leadProgress = targetLeads > 0 ? (currentLeads / targetLeads) * 100 : 0
 
-  const conversionKPI = campaign.kpis.find(kpi => kpi.name.toLowerCase().includes('conversion'))
-  const engagementKPI = campaign.kpis.find(kpi => kpi.name.toLowerCase().includes('engagement'))
+  // Optional KPIs (not currently used directly) removed to avoid unused variable lint warnings
   const metrics = [
     {
       title: 'Total Budget',
@@ -135,18 +136,19 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-2xl">{campaign.name}</CardTitle>
-              <CardDescription className="mt-2 capitalize">
-                {campaign.objective.replace('-', ' ')}
-              </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl">{campaign.name}</CardTitle>
+                <CardDescription className="mt-2 capitalize">
+                  {campaign.objective.replace('-', ' ')}
+                </CardDescription>
+              </div>
+              <span
+                className={`px-3 py-1 capitalize text-sm font-medium ${campaign.status === 'active' ? 'bg-slate-100 text-slate-800' : 'bg-slate-200 text-slate-600'}`}
+              >
+                {campaign.status}
+              </span>
             </div>
-              variant={campaign.status === 'active' ? 'default' : 'secondary'}
-              className="px-3 py-1 capitalize"
-            >
-              {campaign.status}
-          </div>
         </CardHeader>
       </Card>
 
@@ -379,6 +381,9 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
               <h4 className="font-medium text-sm">Selected Channels</h4>
               <div className="flex flex-wrap gap-2">
                 {campaign.channels.map(channel => (
+                  <span key={channel} className="px-2 py-1 bg-slate-100 text-sm rounded">
+                    {channel}
+                  </span>
                 ))}
               </div>
             </div>
