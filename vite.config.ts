@@ -10,3 +10,8 @@ export default defineConfig({
     },
   },
 });
+export default defineConfig({
+  base: '/campaign-intelligence-hub/',
+  plugins: [react()],
+});
+
