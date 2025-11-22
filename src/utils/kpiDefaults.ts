@@ -53,5 +53,11 @@ export function generateDefaultKPIs(objective: string, channels: string[]): KPI[
   // Start with the 3 base KPIs from objective
   kpis.push(...baseKPIs.slice(0, 3))
 
+  // Append KPIs for provided channels (if any)
+  for (const ch of channels || []) {
+    const mapped = channelKPI[ch]
+    if (mapped) kpis.push(mapped)
+  }
+
   return kpis
 }
