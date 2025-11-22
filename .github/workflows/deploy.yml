@@ -16,31 +16,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      # ------------------------------------------------------------------
-      # CRITICAL: ADDED BUILD STEPS
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Assuming you are using Node.js version 20
-          node-version: '20' 
-          cache: 'npm' # Uses package-lock.json for faster caching
-          
-      - name: Install Dependencies and Build
-        run: |
-          npm install
-          npm run build # This command creates the './dist' folder
-      # ------------------------------------------------------------------
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # The path must match the output directory from the 'npm run build' command
-          path: './dist' 
-          
+          path: './dist'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
