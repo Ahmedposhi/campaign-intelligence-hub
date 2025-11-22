@@ -43,6 +43,12 @@ export default defineConfig([
 ])
 ```
 
+## Deployment (GitHub Actions)
+
+- Build: The site is built on GitHub Actions (the runner executes `npm ci` and `npm run build`). The CI creates the `./dist` artifact during the workflow run — do not commit or rely on a checked-in `dist/` directory for deployments.
+- Deployment: The workflow uploads the built `./dist` artifact and uses the Pages-native actions (`actions/upload-pages-artifact` + `actions/deploy-pages`) to publish to GitHub Pages.
+- Local `dist/`: You can build locally for development preview, but the production deployment is performed by Actions. Keep `dist/` ignored in the repo (it's already listed in `.gitignore`).
+
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
