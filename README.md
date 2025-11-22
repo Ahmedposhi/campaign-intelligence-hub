@@ -49,6 +49,29 @@ export default defineConfig([
 - Deployment: The workflow uploads the built `./dist` artifact and uses the Pages-native actions (`actions/upload-pages-artifact` + `actions/deploy-pages`) to publish to GitHub Pages.
 - Local `dist/`: You can build locally for development preview, but the production deployment is performed by Actions. Keep `dist/` ignored in the repo (it's already listed in `.gitignore`).
 
+## Repository history cleaned (dist/ removed)
+
+I removed build artifacts (`dist/`) from the repository history to reduce repository size. This rewrote the Git history and was force-pushed to `main`.
+
+If you have a local clone, you must update it to match the rewritten history. Recommended options:
+
+- Re-clone (simplest and safest):
+
+```bash
+git clone git@github.com:Ahmedposhi/campaign-intelligence-hub.git
+```
+
+- Or, reset your existing local clone to the new remote `main` (destructive for local changes):
+
+```bash
+git fetch origin
+git checkout main
+git reset --hard origin/main
+git clean -fd
+```
+
+Note: any local branches or references to old commit SHAs will no longer match the remote. If you need data from the old history, the backup branch was pushed as `backup/remove-dist-<timestamp>` before the purge; contact the repo owner if you need access.
+
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
 ```js
