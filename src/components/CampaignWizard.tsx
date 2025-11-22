@@ -1,63 +1,240 @@
-import { useState } from 'react'
-import { generateDefaultKPIs } from '@/utils/kpiDefaults'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import type { Campaign } from '@/types'
-import { ChevronRight, ChevronLeft, Sparkles, Target, Users, DollarSign, Calendar as CalendarIcon } from 'lucide-react'
+import type { Campaign, KPI } from '@/types'
+import { ChevronRight, ChevronLeft, Sparkles, Target, Users, DollarSign, Calendar as CalendarIcon, Wand2, ArrowUpRightFromSquare, Check } from 'lucide-react'
+import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { generateDefaultKPIs } from '@/utils/kpiDefaults'
 
 interface CampaignWizardProps {
   onCampaignCreate: (campaign: Campaign) => void
 }
 
+const CAMPAIGN_STORAGE_KEY = 'campaignHub_formData';
+
+const initialFormData = {
+  name: '',
+  objective: '',
+  targetAudience: '',
+  budget: '',
+  duration: '', 
+  channels: [] as string[],
+};
+
+// Custom hook to load/save form data to localStorage
+const usePersistentForm = () => {
+    const [formData, setFormData] = useState(() => {
+        try {
+            const savedData = localStorage.getItem(CAMPAIGN_STORAGE_KEY);
+            return savedData ? JSON.parse(savedData) : initialFormData;
+        } catch (error) {
+            console.error("Error loading state from localStorage:", error);
+            return initialFormData;
+        }
+    });
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(CAMPAIGN_STORAGE_KEY, JSON.stringify(formData));
+        } catch (error) {
+            console.error("Error saving state to localStorage:", error);
+        }
+    }, [formData]);
+
+    return [formData, setFormData] as const;
+};
+
 const CampaignWizard = ({ onCampaignCreate }: CampaignWizardProps) => {
   const [step, setStep] = useState(1)
-  const [formData, setFormData] = useState({
-    name: '',
-    objective: '',
-    targetAudience: '',
-    budget: '',
-    duration: '30',
-    channels: [] as string[],
-  })
+  const [formData, setFormData] = usePersistentForm();
 
-  const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
-  const [isGenerating, setIsGenerating] = useState(false)
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isRefining, setIsRefining] = useState(false); 
+  const [isSuggestingChannels, setIsSuggestingChannels] = useState(false);
+  const [enhancementPrompt, setEnhancementPrompt] = useState('');
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [isIdeaModalOpen, setIsIdeaModalOpen] = useState(false);
+
 
   const totalSteps = 4
   const progress = (step / totalSteps) * 100
 
-  const channels = ['LinkedIn', 'Email', 'Content Marketing', 'Webinars', 'Paid Search', 'Display Ads', 'SEO']
+  // Channels array with hints (updated for single-line text)
+  const channels = [
+    { name: 'LinkedIn', hint: 'B2B primary social and account engagement channel.' },
+    { name: 'Email', hint: 'Nurture, retention, and personalized communication.' },
+    { name: 'Content Marketing', hint: 'Long-term SEO, thought leadership, and inbound.' },
+    { name: 'Webinars', hint: 'High-intent lead generation and product education.' },
+    { name: 'Paid Search', hint: 'Capturing immediate, high-intent demand (BOFU).' },
+    { name: 'Display Ads', hint: 'Retargeting and broad awareness across the web.' },
+    { name: 'SEO', hint: 'Organic authority and long-term content ranking.' },
+    { name: 'Social Media', hint: 'General brand building and community engagement (TOFU).' },
+    { name: 'Events', hint: 'Trade shows, conferences, and field marketing.' },
+    { name: 'ABM Platforms', hint: 'Directly targeting high-value, predefined account lists.' },
+    { name: 'Partner/Affiliate Marketing', hint: 'Leveraging ecosystem to drive co-selling or referrals.' },
+    { name: 'Third-Party Review Sites', hint: 'Social proof and validation for B2B software.'},
+    { name: 'Technical Documentation', hint: 'PLG support, feature adoption, and technical buyers.'},
+    { name: 'Retargeting/Programmatic', hint: 'Keeping warm leads engaged to accelerate pipeline.'}
+  ]
+  const channelNames = channels.map(c => c.name);
 
-  const handleGenerateIdeas = () => {
+
+  // Feature B: Strategic AI Ideas Implementation
+  const handleGenerateIdeas = async () => {
+    if (!formData.objective || !formData.targetAudience || !formData.budget || formData.channels.length === 0) {
+      toast.error('Please complete all fields (Objective, Audience, Budget, Channels) before generating ideas.')
+      return
+    }
+
     setIsGenerating(true)
-    setTimeout(() => {
-      const suggestions = [
-        'Launch a thought leadership series featuring customer success stories',
-        'Create an interactive ROI calculator as a lead magnet',
-        'Develop a multi-touch nurture campaign with personalized content',
-        'Host an executive roundtable webinar series',
-        'Build a comprehensive resource hub with gated content'
-      ]
-      setAiSuggestions(suggestions)
+    setAiSuggestions([])
+
+    const prompt = `
+      Objective: ${formData.objective.replace('-', ' ')}
+      Audience: ${formData.targetAudience}
+      Budget: ${formData.budget}
+      Channels: ${formData.channels.join(', ')}
+    `;
+
+    try {
+      const ideas = await callGeminiAPI(prompt);
+      if (ideas.length > 0) {
+        setAiSuggestions(ideas);
+        toast.success('AI strategic ideas generated successfully!');
+      } else {
+        setAiSuggestions(['No specific ideas were generated. Try refining your audience description or inputs.']);
+        toast.error('AI returned no specific ideas.');
+      }
+    } catch (error) {
+      toast.error('Error contacting the AI service. Please try again.');
+      console.error('AI Generation Error:', error);
+      setAiSuggestions([]);
+    } finally {
       setIsGenerating(false)
-    }, 1500)
+    }
+  }
+  
+  // Feature F: AI Idea Enhancement Implementation
+  const handleEnhanceIdeas = async () => {
+    if (!enhancementPrompt.trim()) {
+      toast.error('Please enter your enhancement request (e.g., "focus on a smaller budget").');
+      return;
+    }
+    
+    setIsEnhancing(true);
+    
+    try {
+        const enhancedIdeas = await callGeminiAPIEnhance(enhancementPrompt, aiSuggestions);
+        if (enhancedIdeas.length > 0) {
+            setAiSuggestions(enhancedIdeas);
+            toast.success('AI successfully enhanced the GTM ideas!');
+            setEnhancementPrompt(''); // Clear prompt after success
+            setIsIdeaModalOpen(false); // Close the modal
+        } else {
+            toast.error('AI could not enhance the ideas.');
+        }
+    } catch (error) {
+        toast.error('Error enhancing ideas. Please check your network or try a simpler request.');
+        console.error('AI Enhancement Error:', error);
+    } finally {
+        setIsEnhancing(false);
+    }
   }
 
-  const handleChannelToggle = (channel: string) => {
+
+  // Feature C: AI Audience Refinement Implementation
+  const handleRefineAudience = async () => {
+    if (!formData.targetAudience.trim() || formData.targetAudience.trim().length < 20) {
+        toast.error('Please enter a draft description of your audience first (at least 20 characters).');
+        return;
+    }
+
+    setIsRefining(true);
+
+    try {
+        const refinedText = await callGeminiAPIRefine(formData.targetAudience);
+        setFormData(prev => ({ ...prev, targetAudience: refinedText }));
+        toast.success('Audience description refined by AI for GTM clarity.');
+    } catch (error) {
+        toast.error('Failed to refine audience text.');
+        console.error('AI Refinement Error:', error);
+    } finally {
+        setIsRefining(false);
+    }
+  }
+  
+  // Feature E: AI Channel Selector Implementation
+  const handleSuggestChannels = async () => {
+    if (!formData.objective || !formData.targetAudience || !formData.duration || !formData.budget) {
+      toast.error('Complete Objective, Audience, Duration, and Budget before suggesting channels.')
+      return
+    }
+    
+    setIsSuggestingChannels(true);
+
+    const prompt = `
+      Objective: ${formData.objective.replace('-', ' ')}
+      Audience: ${formData.targetAudience}
+      Duration: ${formData.duration} days
+      Budget: ${formData.budget}
+    `;
+
+    try {
+        const suggestedChannelNames = await callGeminiAPIChannelSuggest(prompt);
+        
+        // Filter suggested names against the master list to ensure validity
+        const validSuggestions = suggestedChannelNames.filter(name => channelNames.includes(name));
+        
+        if (validSuggestions.length > 0) {
+            // Select the suggested channels, keeping existing ones unless suggested
+            setFormData(prev => ({
+                ...prev,
+                channels: Array.from(new Set([...prev.channels, ...validSuggestions])),
+            }));
+            toast.success(`AI suggested ${validSuggestions.length} channels.`);
+        } else {
+            toast.warning('AI could not suggest specific channels based on inputs.');
+        }
+
+    } catch (error) {
+        toast.error('Error suggesting channels.');
+        console.error('AI Channel Suggestion Error:', error);
+    } finally {
+        setIsSuggestingChannels(false);
+    }
+  }
+
+  const handleChannelToggle = (channelName: string) => {
     setFormData(prev => ({
       ...prev,
-      channels: prev.channels.includes(channel)
-        ? prev.channels.filter(c => c !== channel)
-        : [...prev.channels, channel]
+      channels: prev.channels.includes(channelName)
+        ? prev.channels.filter(c => c !== channelName)
+        : [...prev.channels, channelName]
     }))
   }
 
   const handleNext = () => {
+    if (step === 1 && (!formData.name || !formData.objective || !formData.duration)) {
+      toast.error('Please fill in the Campaign Name, Objective, AND Duration.')
+      return
+    }
+    if (step === 2 && !formData.targetAudience) {
+      toast.error('Please describe your Target Audience.')
+      return
+    }
+    if (step === 3 && (!formData.budget || formData.channels.length === 0)) {
+      toast.error('Please specify the budget and select at least one channel.')
+      return
+    }
+
     if (step < totalSteps) setStep(step + 1)
   }
 
@@ -66,9 +243,6 @@ const CampaignWizard = ({ onCampaignCreate }: CampaignWizardProps) => {
   }
 
   const handleSubmit = () => {
-    // Generate default KPIs based on objective and channels
-    const defaultKPIs = generateDefaultKPIs(formData.objective, formData.channels)
-    
     const campaign: Campaign = {
       id: Date.now().toString(),
       name: formData.name,
@@ -78,14 +252,21 @@ const CampaignWizard = ({ onCampaignCreate }: CampaignWizardProps) => {
       startDate: new Date(),
       endDate: new Date(Date.now() + parseInt(formData.duration) * 24 * 60 * 60 * 1000),
       channels: formData.channels,
-      kpis: defaultKPIs, // Pre-populate with default KPIs based on objective
+      kpis: [], 
       content: [],
       status: 'planning'
     }
     onCampaignCreate(campaign)
-    setFormData({ name: '', objective: '', targetAudience: '', budget: '', duration: '30', channels: [] })
-    setStep(1)
+    // Clear storage/state only after successful creation
+    localStorage.removeItem(CAMPAIGN_STORAGE_KEY);
+    setFormData(initialFormData);
+    setAiSuggestions([]);
+    setStep(1);
+    toast.success(`Campaign "${campaign.name}" created!`);
   }
+
+  // Find the selected channel names for display in Step 4
+  const selectedChannelsWithHints = channels.filter(c => formData.channels.includes(c.name));
 
   return (
     <Card className="shadow-lg">
