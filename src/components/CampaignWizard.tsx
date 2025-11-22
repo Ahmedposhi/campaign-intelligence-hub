@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { generateDefaultKPIs } from '@/utils/kpiDefaults'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -65,6 +66,9 @@ const CampaignWizard = ({ onCampaignCreate }: CampaignWizardProps) => {
   }
 
   const handleSubmit = () => {
+    // Generate default KPIs based on objective and channels
+    const defaultKPIs = generateDefaultKPIs(formData.objective, formData.channels)
+    
     const campaign: Campaign = {
       id: Date.now().toString(),
       name: formData.name,
@@ -74,7 +78,7 @@ const CampaignWizard = ({ onCampaignCreate }: CampaignWizardProps) => {
       startDate: new Date(),
       endDate: new Date(Date.now() + parseInt(formData.duration) * 24 * 60 * 60 * 1000),
       channels: formData.channels,
-      kpis: [], // Start with empty KPIs - users will add their own
+      kpis: defaultKPIs, // Pre-populate with default KPIs based on objective
       content: [],
       status: 'planning'
     }

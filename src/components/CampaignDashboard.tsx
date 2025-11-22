@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog'
 import { DollarSign, Target, Calendar, Users, Plus, Edit, Settings, Trash2 } from 'lucide-react'
 import type { Campaign, KPI } from '@/types'
 import { toast } from 'sonner'
@@ -181,10 +181,12 @@ const CampaignDashboard = ({ campaigns, activeCampaign, onUpdateCampaign }: Camp
                 <CardDescription>Track progress toward your goals</CardDescription>
               </div>
               <Dialog open={isAddingKPI} onOpenChange={setIsAddingKPI}>
+                <DialogTrigger asChild>
                   <Button variant="outline" size="sm">
                     <Plus className="w-4 h-4 mr-1" />
                     Add KPI
                   </Button>
+                </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Add New KPI</DialogTitle>

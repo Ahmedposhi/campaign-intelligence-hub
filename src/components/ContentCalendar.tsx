@@ -4,11 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import type { Campaign, ContentItem } from '@/types'
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { FileText, Mail, Video, Layout, Plus, Trash2 } from 'lucide-react'
-
+import { FileText, Video, Mail, Layout, Plus, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface ContentCalendarProps {
@@ -18,6 +16,7 @@ interface ContentCalendarProps {
 
 const ContentCalendar = ({ campaign, onUpdateCampaign }: ContentCalendarProps) => {
   const [isAddingContent, setIsAddingContent] = useState(false)
+  const [currentMonth, setCurrentMonth] = useState(new Date())
   const [newContent, setNewContent] = useState({
     title: '',
     type: '',
@@ -127,12 +126,59 @@ const ContentCalendar = ({ campaign, onUpdateCampaign }: ContentCalendarProps) =
     })
     .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime())
 
-  // Generate next 7 days for calendar view
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(now)
-    date.setDate(date.getDate() + i)
-    return date
-  })
+  // Generate calendar days for full month
+  const generateMonthDays = () => {
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    
+    // First day of the month
+    const firstDay = new Date(year, month, 1)
+    // Last day of the month
+    const lastDay = new Date(year, month + 1, 0)
+    
+    // Get day of week for first day (0 = Sunday)
+    const startDayOfWeek = firstDay.getDay()
+    
+    // Generate array of dates
+    const days = []
+    
+    // Add padding days from previous month
+    for (let i = 0; i < startDayOfWeek; i++) {
+      const date = new Date(year, month, -startDayOfWeek + i + 1)
+      days.push({ date, isCurrentMonth: false })
+    }
+    
+    // Add days of current month
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      const date = new Date(year, month, i)
+      days.push({ date, isCurrentMonth: true })
+    }
+    
+    // Add padding days from next month to complete the grid
+    const remainingDays = 7 - (days.length % 7)
+    if (remainingDays < 7) {
+      for (let i = 1; i <= remainingDays; i++) {
+        const date = new Date(year, month + 1, i)
+        days.push({ date, isCurrentMonth: false })
+      }
+    }
+    
+    return days
+  }
+
+  const monthDays = generateMonthDays()
+
+  const previousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
+  }
+
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
+  }
+
+  const goToToday = () => {
+    setCurrentMonth(new Date())
+  }
 
   return (
     <div className="space-y-6">
@@ -144,10 +190,12 @@ const ContentCalendar = ({ campaign, onUpdateCampaign }: ContentCalendarProps) =
               <CardDescription>Plan and schedule your marketing content for {campaign.name}</CardDescription>
             </div>
             <Dialog open={isAddingContent} onOpenChange={setIsAddingContent}>
+              <DialogTrigger asChild>
                 <Button className="bg-blue-600 hover:bg-blue-700">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Content
                 </Button>
+              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add New Content</DialogTitle>
@@ -244,7 +292,7 @@ const ContentCalendar = ({ campaign, onUpdateCampaign }: ContentCalendarProps) =
         })}
       </div>
 
-      {upcomingContent.length > 0 ? (
+      {upcomingContent.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Upcoming Content</CardTitle>
@@ -292,47 +340,80 @@ const ContentCalendar = ({ campaign, onUpdateCampaign }: ContentCalendarProps) =
             </div>
           </CardContent>
         </Card>
-      ) : (
-        <Card className="border-2 border-dashed">
-          <CardContent className="pt-6 text-center">
-            <p className="text-slate-600 mb-4">No content scheduled yet</p>
-            <Button onClick={() => setIsAddingContent(true)} variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Your First Content
-            </Button>
-          </CardContent>
-        </Card>
       )}
 
-      <div className="grid gap-6 md:grid-cols-7">
-        {weekDays.map((date, idx) => {
-          const dayContent = campaign.content.filter(c => {
-            const contentDate = new Date(c.scheduledDate)
-            return contentDate.toDateString() === date.toDateString()
-          })
+      {/* Full Month Calendar View */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={goToToday}>
+                Today
+              </Button>
+              <Button variant="outline" size="sm" onClick={previousMonth}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={nextMonth}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Day headers */}
+          <div className="grid grid-cols-7 gap-2 mb-2">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="text-center text-sm font-semibold text-slate-600 p-2">
+                {day}
+              </div>
+            ))}
+          </div>
 
-          return (
-            <Card key={idx} className="min-h-[150px]">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-slate-600">
-                  {date.toLocaleDateString('en-US', { weekday: 'short' })}
-                </CardTitle>
-                <p className="text-2xl font-bold">{date.getDate()}</p>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {dayContent.map(content => {
-                  const color = contentTypeColors[content.type as keyof typeof contentTypeColors] || 'bg-slate-500'
-                  return (
-                    <div key={content.id} className={`p-2 ${color.replace('bg-', 'bg-').replace('-500', '-100')} rounded text-xs font-medium ${color.replace('bg-', 'text-').replace('-500', '-700')}`}>
-                      {content.type}
-                    </div>
-                  )
-                })}
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+          {/* Calendar grid */}
+          <div className="grid grid-cols-7 gap-2">
+            {monthDays.map((day, idx) => {
+              const dayContent = campaign.content.filter(c => {
+                const contentDate = new Date(c.scheduledDate)
+                return contentDate.toDateString() === day.date.toDateString()
+              })
+
+              const isToday = day.date.toDateString() === new Date().toDateString()
+
+              return (
+                <div 
+                  key={idx} 
+                  className={`min-h-[100px] border rounded-lg p-2 ${
+                    day.isCurrentMonth ? 'bg-white' : 'bg-slate-50'
+                  } ${isToday ? 'border-blue-500 border-2' : 'border-slate-200'}`}
+                >
+                  <div className={`text-sm font-medium mb-2 ${
+                    day.isCurrentMonth ? 'text-slate-900' : 'text-slate-400'
+                  } ${isToday ? 'text-blue-600 font-bold' : ''}`}>
+                    {day.date.getDate()}
+                  </div>
+                  <div className="space-y-1">
+                    {dayContent.map(content => {
+                      const color = contentTypeColors[content.type as keyof typeof contentTypeColors] || 'bg-slate-500'
+                      return (
+                        <div 
+                          key={content.id} 
+                          className={`p-1 ${color.replace('bg-', 'bg-').replace('-500', '-100')} rounded text-xs font-medium ${color.replace('bg-', 'text-').replace('-500', '-700')} truncate`}
+                          title={content.title}
+                        >
+                          {content.title.length > 15 ? content.title.substring(0, 15) + '...' : content.title}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

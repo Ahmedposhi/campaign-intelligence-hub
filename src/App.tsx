@@ -11,12 +11,23 @@ import ContentCalendar from '@/components/ContentCalendar'
 import ROICalculator from '@/components/ROICalculator'
 import type { Campaign } from '@/types'
 import { storage } from '@/utils/storage'
-import { Sparkles, LayoutDashboard, Calendar, Calculator, Download, Upload, Save, Trash2, FolderOpen } from 'lucide-react'
+import { useCampaignContext } from '@/context/CampaignContext'
+import { Sparkles, LayoutDashboard, Calendar, Calculator, Download, Upload, Save, Trash2, FolderOpen, ChevronDown } from 'lucide-react'
 
 function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null)
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    return localStorage.getItem('activeTab') || 'wizard'
+  })
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [campaignMenuOpen, setCampaignMenuOpen] = useState(false)
+  const { selectedCampaign, setSelectedCampaign } = useCampaignContext()
+
+  // Save active tab to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab)
+  }, [activeTab])
 
   // Load campaigns from localStorage on mount
   useEffect(() => {
@@ -61,6 +72,8 @@ function App() {
 
   const handleSelectCampaign = (campaign: Campaign) => {
     setActiveCampaign(campaign)
+    setSelectedCampaign(campaign)
+    setCampaignMenuOpen(false)
     toast.success(`Switched to: ${campaign.name}`)
   }
 
@@ -141,7 +154,38 @@ function App() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {campaigns.length > 0 && (
+                <div className="relative">
+                  <Button
+                    onClick={() => setCampaignMenuOpen(!campaignMenuOpen)}
+                    className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2"
+                  >
+                    <span className="truncate max-w-[150px]">
+                      {selectedCampaign ? selectedCampaign.name : 'Select campaign'}
+                    </span>
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+
+                  {campaignMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white text-slate-900 rounded-md shadow-lg z-50">
+                      <div className="py-1">
+                        {campaigns.map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => handleSelectCampaign(c)}
+                            className="w-full text-left px-4 py-2 hover:bg-slate-100"
+                          >
+                            {c.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="text-sm text-slate-600">
                 {campaigns.length} Campaign{campaigns.length !== 1 ? 's' : ''}
+              </div>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -181,7 +225,7 @@ function App() {
           )}
         </header>
 
-        <Tabs defaultValue="wizard" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 h-auto p-1">
             <TabsTrigger value="wizard" className="flex items-center gap-2 py-3">
               <Sparkles className="w-4 h-4" />
