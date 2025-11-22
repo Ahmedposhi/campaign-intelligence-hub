@@ -1,3 +1,4 @@
+## CI: Builds run on GitHub Actions. Do not commit `dist/` to the repo.
 name: Deploy to GitHub Pages
 
 on:
